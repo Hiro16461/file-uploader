@@ -14,6 +14,8 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use('/uploads', express.static('/public/uploads'))
+
 app.use(
 	session({
 		cookie: {
@@ -36,6 +38,9 @@ app.use((req, res, next) => {
 	res.locals.currentUser = req.user;
 	next();
 });
+
+const fileRoutes = require('./routes/fileRoutes')
+app.use('/', fileRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
