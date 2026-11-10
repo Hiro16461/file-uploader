@@ -7,22 +7,31 @@ exports.getUploadForm = (req, res) => {
 exports.uploadFile = async (req, res) => {
 	try {
 		if (!req.file) {
-			return res.status(400).send('Files does not select.');
+			return res.status(400).send('No file selected.');
 		}
+
+		const { folderId } = req.body;
 
 		await prisma.file.create({
 			data: {
 				name: req.file.originalname,
 				size: req.file.size,
-				url: `../public/uploads/${req.file.filename}`,
-				mimeType: req.file.mimeType,
+				url: `/uploads/${req.file.filename}`,
+				mimeType: req.file.mimetype, 
 				userId: req.user.id,
+				folderId: folderId || null,
 			},
-        });
-        console.log(`Saved file information`, req.file);
-        res.redirect('/')
+		});
+
+		console.log('Saved file information:', req.file);
+
+		if (folderId) {
+			res.redirect(`/folders/${folderId}`); 
+		} else {
+			res.redirect('/');
+		}
 	} catch (err) {
 		console.error(err);
-		res.status(500).send('Server error happens...');
+		res.status(500).send('Server error happened...');
 	}
 };

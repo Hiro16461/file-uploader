@@ -4,6 +4,7 @@ const session = require('express-session');
 const passport = require('passport');
 const { prisma } = require('./lib/prisma');
 const { PrismaSessionStore } = require('@quixo3/prisma-session-store');
+const path = require('path');
 
 require('./config/passport');
 
@@ -14,7 +15,7 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use('/uploads', express.static('/public/uploads'))
+app.use('/uploads', express.static(path.join(__dirname, "public/uploads")))
 
 app.use(
 	session({
@@ -39,9 +40,11 @@ app.use((req, res, next) => {
 	next();
 });
 
+const indexRoutes = require('./routes/indexRoutes')
 const fileRoutes = require('./routes/fileRoutes')
 const authRoutes = require('./routes/authRoutes');
 
+app.use('/', indexRoutes)
 app.use('/', fileRoutes);
 app.use('/', authRoutes);
 
