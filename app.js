@@ -40,7 +40,10 @@ app.use((req, res, next) => {
 });
 
 const fileRoutes = require('./routes/fileRoutes')
+const authRoutes = require('./routes/authRoutes');
+
 app.use('/', fileRoutes);
+app.use('/', authRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
