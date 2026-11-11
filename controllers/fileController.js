@@ -67,14 +67,14 @@ exports.uploadFile = async (req, res) => {
 			data: {
 				name: req.file.originalname,
 				size: req.file.size,
-				url: `/uploads/${req.file.filename}`,
+				url: req.file.path,
 				mimeType: req.file.mimetype, 
 				userId: req.user.id,
 				folderId: folderId || null,
 			},
 		});
 
-		console.log('Saved file information:', req.file);
+		console.log('Saved file information:', req.file.path);
 
 		if (folderId) {
 			res.redirect(`/folders/${folderId}`); 

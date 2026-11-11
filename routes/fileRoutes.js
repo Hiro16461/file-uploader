@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const fileController = require('../controllers/fileController');
-const upload = require('../config/multer');
+const upload = require('../config/cloudinary');
 
 const ensureAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) {
