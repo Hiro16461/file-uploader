@@ -59,7 +59,7 @@
         <%} %>
         <% files.forEach(file => { %>
             <li>
-               📄 <a href="<%= file.url %>" target="_blank"><%= file.name %></a>
+               📄 <a href="/files/<%= file.id %>"><%= file.name %></a>
                (<%= Math.round(file.size / 1024) %> KB)
             </li>
         <% }) %>
