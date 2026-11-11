@@ -13,6 +13,7 @@ router.get('/', ensureAuthenticated, folderController.getDashboard);
 
 router.post('/folders', ensureAuthenticated, folderController.createFolder);
 router.get('/folders/:id', ensureAuthenticated, folderController.getFolderDetail);
+router.post('/folders/:id/update', ensureAuthenticated, folderController.updateFolder)
 router.post('/folders/:id/delete', ensureAuthenticated, folderController.deleteFolder);
 
 router.post('/upload', ensureAuthenticated, upload.single('file'), fileController.uploadFile);

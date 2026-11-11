@@ -6,9 +6,11 @@ exports.getDashboard = async (req, res) => {
 
 		const folders = await prisma.folder.findMany({
 			where: { userId, parentId: null },
+			orderBy: {createdAt: "desc"}
 		});
 		const files = await prisma.file.findMany({
 			where: { userId, folderId: null },
+			orderBy: { createdAt: "desc" }
 		});
 
 		res.render('dashboard', { currentFolder: null, folders, files });
@@ -21,10 +23,11 @@ exports.getDashboard = async (req, res) => {
 exports.createFolder = async (req, res) => {
 	try {
 		const { name, parentId } = req.body;
+		const userId = req.user.id
 		await prisma.folder.create({
 			data: {
 				name,
-				userId: req.user.id,
+				userId,
 				parentId: parentId || null,
 			},
 		});
@@ -55,9 +58,11 @@ exports.getFolderDetail = async (req, res) => {
 
 		const folders = await prisma.folder.findMany({
 			where: { userId, parentId: folderId },
+			orderBy: {createdAt: "desc"}
 		});
 		const files = await prisma.file.findMany({
 			where: { userId, folderId },
+			orderBy: {createdAt: "desc"}
 		});
 
 		res.render('dashboard', { currentFolder, folders, files });
@@ -67,12 +72,41 @@ exports.getFolderDetail = async (req, res) => {
 	}
 };
 
+exports.updateFolder = async (req, res) => {
+	try {
+		const folderId = req.params.id;
+		const { name } = req.body;
+		const userId = req.user.id;
+
+		const folder = await prisma.folder.findUnique({ where: { id: folderId } })
+		if (!folder || folder.userId !== userId) {
+			return res.status(403).send('You are not authorized.')
+		}
+
+		await prisma.folder.update({
+			where: { id: folderId },
+			data: {name}
+		})
+
+		if (folder.parentId) {
+			res.redirect(`/folders/${folder.parentId}`)
+		} else {
+			res.redirect('/')
+		}
+
+	} catch (err) {
+		console.error(err);
+		res.status(500).send('Failed to rename the folder.');
+	}
+}
+
 exports.deleteFolder = async (req, res) => {
     try {
-        const folderId = req.params.id;
+		const folderId = req.params.id;
+		const userId = req.user.id;
         const folder = await prisma.folder.findUnique({ where: { id: folderId } })
         
-        if (!folder || folder.userId !== req.user.id) {
+        if (!folder || folder.userId !== userId) {
             return res.status(403).send("You do not have permission")
         }
 
