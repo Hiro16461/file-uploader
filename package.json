@@ -20,6 +20,7 @@
   },
   "scripts": {
     "start": "node app.js",
-    "dev": "node --watch app.js"
+    "dev": "node --watch app.js",
+    "postinstall": "npx prisma generate"
   }
 }
