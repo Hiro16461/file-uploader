@@ -1,60 +1,53 @@
 const { prisma } = require('../lib/prisma');
-const path = require('path');
 
+// 1. アップロードフォーム表示
 exports.getUploadForm = (req, res) => {
-	res.render('upload')
-}
+	res.render('upload');
+};
 
-exports.getFileDetail = async(req, res) => {
+// 2. ファイル詳細表示
+exports.getFileDetail = async (req, res) => {
 	try {
-		const fileId = req.params.id;
+		const fileId = req.params.id; // parseInt は不要
 		const userId = req.user.id;
 
 		const file = await prisma.file.findUnique({
-			where: {id:fileId}
-		})
+			where: { id: fileId },
+		});
 
 		if (!file || file.userId !== userId) {
-			return res.status(404).send('File does not find')
+			return res.status(404).send('File not found');
 		}
 
-		res.render('fileDetail', {file})
+		res.render('fileDetail', { file });
 	} catch (err) {
 		console.error(err);
 		res.status(500).send('Failed to retrieve file information.');
 	}
 };
 
+// 3. ファイルダウンロード（Cloudinary URLへリダイレクト）
 exports.downloadFile = async (req, res) => {
 	try {
-		const fileId = req.params.id;
+		const fileId = req.params.id; // parseInt は不要
 		const userId = req.user.id;
 
 		const file = await prisma.file.findUnique({
-			where: {id:fileId}
-		})
+			where: { id: fileId },
+		});
 
 		if (!file || file.userId !== userId) {
-			return res.status(404).send('File does not find')
+			return res.status(404).send('File not found');
 		}
 
-		const filePath = path.join(__dirname, "../public", file.url);
-
-		res.download(filePath, file.name, (err) => {
-			if (err) {
-				console.error('download error', err)
-				if (!res.headerSent) {
-					res.status(500).send('File download failed...')
-				}
-			}
-		})
-
+		res.redirect(file.url);
 	} catch (err) {
 		console.error(err);
 		res.status(500).send('An error occurred during the download process.');
 	}
-}
+};
 
+// 4. ファイルアップロード処理
 exports.uploadFile = async (req, res) => {
 	try {
 		if (!req.file) {
@@ -62,22 +55,24 @@ exports.uploadFile = async (req, res) => {
 		}
 
 		const { folderId } = req.body;
+		// 空文字 ("") の場合は null に変換
+		const targetFolderId = folderId && folderId.trim() !== '' ? folderId : null;
 
 		await prisma.file.create({
 			data: {
 				name: req.file.originalname,
 				size: req.file.size,
 				url: req.file.path,
-				mimeType: req.file.mimetype, 
+				mimeType: req.file.mimetype,
 				userId: req.user.id,
-				folderId: folderId || null,
+				folderId: targetFolderId,
 			},
 		});
 
 		console.log('Saved file information:', req.file.path);
 
-		if (folderId) {
-			res.redirect(`/folders/${folderId}`); 
+		if (targetFolderId) {
+			res.redirect(`/folders/${targetFolderId}`);
 		} else {
 			res.redirect('/');
 		}

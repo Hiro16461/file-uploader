@@ -16,6 +16,30 @@ const storage = new CloudinaryStorage({
 	},
 });
 
-const upload = multer({ storage })
+const allowedMimeTypes = [
+	'image/jpeg',
+	'image/png',
+	'image/gif',
+	'application/pdf',
+];
+
+const fileFilter = (req, file, cb) => {
+	if (allowedMimeTypes.includes(file.mimetype)) {
+		cb(null, true);
+	} else {
+		cb(
+			new Error(
+				'This file format is not permitted (only JPEG, PNG, GIF, and PDF files can be uploaded).',
+			),
+			false,
+		);
+	}
+};
+
+const upload = multer({
+	storage,
+	limits: { fileSize: 5 * 1024 * 1024 },
+	fileFilter
+});
 
 module.exports = upload;

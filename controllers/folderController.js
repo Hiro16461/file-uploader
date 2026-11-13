@@ -1,16 +1,18 @@
 const { prisma } = require('../lib/prisma');
+const crypto = require('crypto');
 
+// 1. ダッシュボード（ルート階層）
 exports.getDashboard = async (req, res) => {
 	try {
 		const userId = req.user.id;
 
 		const folders = await prisma.folder.findMany({
 			where: { userId, parentId: null },
-			orderBy: {createdAt: "desc"}
+			orderBy: { createdAt: 'desc' },
 		});
 		const files = await prisma.file.findMany({
 			where: { userId, folderId: null },
-			orderBy: { createdAt: "desc" }
+			orderBy: { createdAt: 'desc' },
 		});
 
 		res.render('dashboard', { currentFolder: null, folders, files });
@@ -20,20 +22,25 @@ exports.getDashboard = async (req, res) => {
 	}
 };
 
+// 2. フォルダ作成
 exports.createFolder = async (req, res) => {
 	try {
 		const { name, parentId } = req.body;
-		const userId = req.user.id
+		const userId = req.user.id;
+
+		// parentId が空文字 ("") で送られてきた場合は null に変換
+		const targetParentId = parentId && parentId.trim() !== '' ? parentId : null;
+
 		await prisma.folder.create({
 			data: {
 				name,
 				userId,
-				parentId: parentId || null,
+				parentId: targetParentId,
 			},
 		});
 
-		if (parentId) {
-			res.redirect(`/folders/${parentId}`);
+		if (targetParentId) {
+			res.redirect(`/folders/${targetParentId}`);
 		} else {
 			res.redirect('/');
 		}
@@ -43,6 +50,7 @@ exports.createFolder = async (req, res) => {
 	}
 };
 
+// 3. フォルダ詳細
 exports.getFolderDetail = async (req, res) => {
 	try {
 		const folderId = req.params.id;
@@ -58,67 +66,68 @@ exports.getFolderDetail = async (req, res) => {
 
 		const folders = await prisma.folder.findMany({
 			where: { userId, parentId: folderId },
-			orderBy: {createdAt: "desc"}
+			orderBy: { createdAt: 'desc' },
 		});
 		const files = await prisma.file.findMany({
-			where: { userId, folderId },
-			orderBy: {createdAt: "desc"}
+			where: { userId, folderId: folderId },
+			orderBy: { createdAt: 'desc' },
 		});
 
-		res.render('dashboard', { currentFolder, folders, files });
+		res.render('dashboard', { currentFolder, folders, files, protocol: req.protocol, host: req.get('host') });
 	} catch (err) {
 		console.error(err);
 		res.status(500).send('Server error happened...');
 	}
 };
 
+// 4. フォルダ名変更
 exports.updateFolder = async (req, res) => {
 	try {
 		const folderId = req.params.id;
 		const { name } = req.body;
 		const userId = req.user.id;
 
-		const folder = await prisma.folder.findUnique({ where: { id: folderId } })
+		const folder = await prisma.folder.findUnique({ where: { id: folderId } });
 		if (!folder || folder.userId !== userId) {
-			return res.status(403).send('You are not authorized.')
+			return res.status(403).send('You are not authorized.');
 		}
 
 		await prisma.folder.update({
 			where: { id: folderId },
-			data: {name}
-		})
+			data: { name },
+		});
 
 		if (folder.parentId) {
-			res.redirect(`/folders/${folder.parentId}`)
+			res.redirect(`/folders/${folder.parentId}`);
 		} else {
-			res.redirect('/')
+			res.redirect('/');
 		}
-
 	} catch (err) {
 		console.error(err);
 		res.status(500).send('Failed to rename the folder.');
 	}
-}
+};
 
+// 5. フォルダ削除
 exports.deleteFolder = async (req, res) => {
-    try {
+	try {
 		const folderId = req.params.id;
 		const userId = req.user.id;
-        const folder = await prisma.folder.findUnique({ where: { id: folderId } })
-        
-        if (!folder || folder.userId !== userId) {
-            return res.status(403).send("You do not have permission")
-        }
+		const folder = await prisma.folder.findUnique({ where: { id: folderId } });
 
-        await prisma.folder.delete({ where: { id: folderId } })
-        
-        if (folder.parentId) {
-            res.redirect(`/folders/${folder.parentId}`)
-        } else {
-            res.redirect('/')
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Failed to delete the folder.');
-    }
-}
+		if (!folder || folder.userId !== userId) {
+			return res.status(403).send('You do not have permission');
+		}
+
+		await prisma.folder.delete({ where: { id: folderId } });
+
+		if (folder.parentId) {
+			res.redirect(`/folders/${folder.parentId}`);
+		} else {
+			res.redirect('/');
+		}
+	} catch (err) {
+		console.error(err);
+		res.status(500).send('Failed to delete the folder.');
+	}
+};

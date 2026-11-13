@@ -64,5 +64,26 @@
             </li>
         <% }) %>
     </ul>
+
+    <% if(currentFolder) { %>
+        <hr>
+        <h3>Share Folder</h3>
+        <form action="/folders/<%= currentFolder.id %>/share" method="POST">
+        <label for="duration">Share Duration:</label>
+        <select name="duration" id="duration">
+            <option value="1">1 Day</option>
+            <option value="7">7 Days</option>
+            <option value="30">30 Days</option>
+        </select>
+        <button type="submit">Generate Share Link</button>
+    </form>
+    
+    <% if (currentFolder.shareToken) { %>
+        <p>Share URL:</p>
+        <input type="text" value="<%= `${protocol}://${host}/share/${currentFolder.shareToken}` %>" readonly />
+        <p>Expires at: <%= new Date(currentFolder.shareExpiresAt).toLocaleString('ja-JP') %></p>
+    <% } %>
+<%} %>
+
 </body>
 </html>

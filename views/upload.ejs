@@ -7,6 +7,8 @@
 </head>
 <body>
     <h1>File upload</h1>
+    <p>※ Files that can be uploaded: <strong>JPEG, PNG, GIF, PDF</strong></p>
+  <p>※ Maximum file size: <strong>5 MB</strong></p>
     <% if(locals.currentUser) { %>
         <p>Welcome, <%= currentUser.username %></p>
         <form action="/upload" method="post" enctype="multipart/form-data">

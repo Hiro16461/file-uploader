@@ -1,28 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Detail <%= file.name %></title>
+    <title>File Detail - <%= file.name %></title>
 </head>
 <body>
     <h1>File Detail</h1>
 
     <div>
-        <p><strong>File name</strong><%= file.name %></p>
-        <p><strong>Size:</strong><%= (file.size / 1024).toFixed(2) %> KB (<%= file.size %> Bite)</p>
-        <p><strong>File format(MIME):</strong><%= file.mimeType || 'Unknown'%></p>
-        <p><strong>Upload date:</strong><%= new Date(file.createdAt).toLocaleString('ja-JP') %></p>
+        <p><strong>File name:</strong> <%= file.name %></p>
+        <p><strong>Size:</strong> <%= (file.size / 1024).toFixed(2) %> KB (<%= file.size %> Bytes)</p>
+        <p><strong>File format (MIME):</strong> <%= file.mimeType || 'Unknown' %></p>
+        <p><strong>Upload date:</strong> <%= new Date(file.createdAt).toLocaleString('ja-JP') %></p>
     </div>
+    
     <hr>
-    <a href="/files/<%= file.id%>/download">
+    
+    <a href="/files/<%= file.id %>/download" target="_blank" download="<%= file.name %>">
         <button type="button">⬇️ Download this file</button>
     </a>
+    
     <br><br>
-    <% if(file.folderId) { %>
+    
+    <% if (file.folderId) { %>
         <a href="/folders/<%= file.folderId %>">← Back to folder</a>
-    <% } else {%>
+    <% } else { %>
         <a href="/">← Back to dashboard</a>
-        <% } %>
+    <% } %>
 </body>
 </html>

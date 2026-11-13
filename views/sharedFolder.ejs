@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Folder: <%= folder.name %></title>
+</head>
+<body>
+    <h1>Shared Folder: <%= folder.name %></h1>
+    <p>This folder is publicly shared.</p>
+
+    <h2>Subfolders</h2>
+    <ul>
+        <% folder.children.forEach(sub => { %>
+            <li><%= sub.name %></li>
+        <% }) %>
+    </ul>
+
+    <h2>Files</h2>
+    <ul>
+        <% folder.files.forEach(file => { %>
+            <li>
+                <a href="<%= file.url %>" target="_blank" download="<%= file.name %>">
+                    <%= file.name %>
+                </a> (<%= (file.size / 1024).toFixed(2) %> KB)
+            </li>
+        <% }) %>
+    </ul>
+</body>
+</html>

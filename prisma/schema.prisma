@@ -44,6 +44,9 @@ model Folder {
   children Folder[] @relation("FolderToFolder")
 
   files File[]
+
+  shareToken String? @unique
+  shareExpiresAt DateTime?
 }
 
 model File {

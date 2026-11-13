@@ -36,17 +36,19 @@ app.use(
 app.use(passport.session());
 
 app.use((req, res, next) => {
-	res.locals.currentUser = req.user;
+	res.locals.currentUser = req.user || null;
 	next();
 });
 
 const indexRoutes = require('./routes/indexRoutes')
 const fileRoutes = require('./routes/fileRoutes')
 const authRoutes = require('./routes/authRoutes');
+const shareRoutes = require('./routes/shareRoutes');
 
 app.use('/', indexRoutes)
 app.use('/', fileRoutes);
 app.use('/', authRoutes);
+app.use('/', shareRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
